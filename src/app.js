@@ -1,16 +1,17 @@
 import { generateQrSvg } from "./qr.js";
 import { normalizeUrl } from "./normalize.js";
 import { qrFilename, qrMatrix } from "./download.js";
+import { sizedSvg } from "./size.js";
 
-const PNG_TARGET_PX = 1024; // crisp output, larger than the on-screen preview
 const QUIET_ZONE = 4; // modules of white border, per the QR spec
 
-// Thin DOM glue: wire Generate + the download buttons.
+// Thin DOM glue: wire Generate, the size control, and the download buttons.
 // doc and qrLib are injected so this runs in the browser (document, window.qrcode)
 // and in tests (happy-dom document, the `qrcode-generator` npm module).
 export function initApp(doc, qrLib) {
   const input = doc.querySelector("#url");
   const button = doc.querySelector("#generate");
+  const size = doc.querySelector("#size");
   const error = doc.querySelector("#error");
   const preview = doc.querySelector("#preview");
   const downloadPng = doc.querySelector("#download-png");
@@ -19,9 +20,17 @@ export function initApp(doc, qrLib) {
   // The URL currently shown as a QR, or null when there's nothing to download.
   let current = null;
 
+  const currentSize = () => Number(size.value);
+
   function setDownloadsEnabled(enabled) {
     downloadPng.disabled = !enabled;
     downloadSvg.disabled = !enabled;
+  }
+
+  // Render the current URL into the preview at the chosen size.
+  async function showQr(url) {
+    const svg = await generateQrSvg(qrLib, url);
+    preview.innerHTML = sizedSvg(svg, currentSize());
   }
 
   button.addEventListener("click", async () => {
@@ -35,20 +44,25 @@ export function initApp(doc, qrLib) {
     }
     error.textContent = "";
     current = result.url;
-    preview.innerHTML = await generateQrSvg(qrLib, current);
+    await showQr(current);
     setDownloadsEnabled(true);
+  });
+
+  // Changing the size re-renders the QR already on screen.
+  size.addEventListener("change", async () => {
+    if (current) await showQr(current);
   });
 
   downloadSvg.addEventListener("click", async () => {
     if (!current) return;
-    const svg = await generateQrSvg(qrLib, current);
+    const svg = sizedSvg(await generateQrSvg(qrLib, current), currentSize());
     const blob = new Blob([svg], { type: "image/svg+xml" });
     triggerDownload(doc, URL.createObjectURL(blob), qrFilename(current, "svg"), true);
   });
 
   downloadPng.addEventListener("click", () => {
     if (!current) return;
-    const dataUrl = matrixToPngDataUrl(doc, qrMatrix(qrLib, current), PNG_TARGET_PX);
+    const dataUrl = matrixToPngDataUrl(doc, qrMatrix(qrLib, current), currentSize());
     triggerDownload(doc, dataUrl, qrFilename(current, "png"), false);
   });
 }
