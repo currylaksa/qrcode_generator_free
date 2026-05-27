@@ -22,10 +22,18 @@
         padding: 0.5rem;
         font-size: 1rem;
       }
-      #generate {
+      #generate,
+      #downloads button {
         padding: 0.5rem 1rem;
         font-size: 1rem;
         cursor: pointer;
+      }
+      #downloads button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      #downloads {
+        margin-top: 1rem;
       }
       #preview svg {
         width: 256px;
@@ -49,6 +57,11 @@
 
     <p id="error" role="alert"></p>
     <div id="preview"></div>
+
+    <div class="row" id="downloads">
+      <button id="download-png" disabled>Download PNG</button>
+      <button id="download-svg" disabled>Download SVG</button>
+    </div>
 
     <!-- Vendored QR library (no CDN); exposes window.qrcode -->
     <script src="./vendor/qrcode.js"></script>

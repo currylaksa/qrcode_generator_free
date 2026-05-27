@@ -8,7 +8,16 @@ function setupDom() {
     <button id="generate">Generate</button>
     <p id="error"></p>
     <div id="preview"></div>
+    <button id="download-png" disabled>Download PNG</button>
+    <button id="download-svg" disabled>Download SVG</button>
   `;
+}
+
+function downloadsDisabled() {
+  return (
+    document.querySelector("#download-png").disabled &&
+    document.querySelector("#download-svg").disabled
+  );
 }
 
 function clickGenerate(value) {
@@ -43,5 +52,23 @@ describe("initApp DOM wiring", () => {
 
     expect(document.querySelector("#preview svg")).not.toBeNull();
     expect(document.querySelector("#error").textContent).toBe("");
+  });
+
+  it("keeps downloads disabled until a QR is generated", async () => {
+    initApp(document, qrcode);
+    expect(downloadsDisabled()).toBe(true);
+
+    await clickGenerate("example.com");
+    expect(downloadsDisabled()).toBe(false);
+  });
+
+  it("re-disables downloads when input becomes invalid", async () => {
+    initApp(document, qrcode);
+
+    await clickGenerate("example.com");
+    expect(downloadsDisabled()).toBe(false);
+
+    await clickGenerate("hello");
+    expect(downloadsDisabled()).toBe(true);
   });
 });
