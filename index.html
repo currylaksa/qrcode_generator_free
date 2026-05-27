@@ -60,13 +60,16 @@
         display: flex;
         align-items: baseline;
         justify-content: space-between;
-        gap: 1rem;
+        gap: 0.6rem 1rem;
+        flex-wrap: wrap;
       }
       .brand {
+        margin: 0;
         font-family: "Archivo", sans-serif;
         font-weight: 800;
         font-stretch: 125%;
         font-size: 1.7rem;
+        line-height: 1;
         letter-spacing: 0.02em;
       }
       .tag {
@@ -77,6 +80,13 @@
         padding: 0.2rem 0.45rem;
         white-space: nowrap;
       }
+      .tagline {
+        margin: 0.55rem 0 0;
+        font-size: 0.82rem;
+        letter-spacing: 0.03em;
+        color: var(--ink-soft);
+      }
+      .tagline b { color: var(--ink); font-weight: 700; }
       .rule {
         border: none;
         border-top: 1px solid var(--rule);
@@ -290,6 +300,8 @@
       .card > *:nth-child(6) { animation-delay: 0.22s; }
       .card > *:nth-child(7) { animation-delay: 0.26s; }
       .card > *:nth-child(8) { animation-delay: 0.30s; }
+      .card > *:nth-child(9) { animation-delay: 0.34s; }
+      .card > *:nth-child(10) { animation-delay: 0.38s; }
 
       @keyframes bootIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
       @keyframes qrIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
@@ -303,9 +315,11 @@
   <body>
     <main class="card">
       <header class="topbar">
-        <span class="brand">QR//GEN</span>
+        <h1 class="brand">QR//GEN</h1>
         <span class="tag">V.1 · FREE · NO-TRACKING</span>
       </header>
+
+      <p class="tagline"><b>Free QR code generator.</b> Turn any link into a scannable QR code.</p>
 
       <hr class="rule" />
 
