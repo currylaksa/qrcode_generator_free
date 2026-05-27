@@ -14,7 +14,7 @@ function setupDom() {
     <button id="support-open">Support</button>
     <dialog id="support-dialog">
       <button id="support-close">x</button>
-      <img src="./bankQR.JPG" />
+      <img id="support-qr" data-src="./bankQR.JPG" alt="" />
     </dialog>
   `;
 }
@@ -29,6 +29,16 @@ describe("support modal", () => {
 
     document.querySelector("#support-open").click();
     expect(dialog.open).toBe(true);
+  });
+
+  it("does not load the QR image until the dialog is opened", () => {
+    initApp(document, qrcode);
+    const img = document.querySelector("#support-qr");
+    // No src on load → the browser never fetches bankQR.JPG up front.
+    expect(img.getAttribute("src")).toBeNull();
+
+    document.querySelector("#support-open").click();
+    expect(img.getAttribute("src")).toBe("./bankQR.JPG");
   });
 
   it("closes when the close button is clicked", () => {

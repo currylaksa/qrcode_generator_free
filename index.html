@@ -361,7 +361,9 @@
         <h2>Keep it free</h2>
         <p>This tool is free &amp; ad-free. If it helped, a small tip keeps it alive — entirely optional.</p>
         <div class="modal-qr">
-          <img src="./bankQR.JPG" alt="Touch 'n Go eWallet payment QR for Chan Qing Yee" />
+          <!-- Lazy-loaded: src is set from data-src by app.js only when the
+               dialog first opens, so the image isn't fetched on page load. -->
+          <img id="support-qr" data-src="./bankQR.JPG" alt="Touch 'n Go eWallet payment QR for Chan Qing Yee" />
         </div>
         <p class="modal-cap">▸ Scan to tip</p>
       </div>

@@ -75,9 +75,16 @@ function wireSupportModal(doc) {
   const dialog = doc.querySelector("#support-dialog");
   const open = doc.querySelector("#support-open");
   const close = doc.querySelector("#support-close");
+  const qr = doc.querySelector("#support-qr");
   if (!dialog || !open) return;
 
-  open.addEventListener("click", () => dialog.showModal());
+  open.addEventListener("click", () => {
+    // Lazy-load the QR: only fetch the image the first time the dialog opens.
+    if (qr && !qr.getAttribute("src") && qr.dataset.src) {
+      qr.src = qr.dataset.src;
+    }
+    dialog.showModal();
+  });
   if (close) close.addEventListener("click", () => dialog.close());
   // Click on the backdrop (outside the modal content) closes it.
   dialog.addEventListener("click", (e) => {
