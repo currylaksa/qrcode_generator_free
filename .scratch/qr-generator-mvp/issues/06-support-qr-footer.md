@@ -1,6 +1,6 @@
 # Support QR footer section
 
-Status: ready-for-agent
+Status: done
 
 ## What to build
 
@@ -10,11 +10,13 @@ The agent builds the layout against a clearly-named placeholder image; the maint
 
 ## Acceptance criteria
 
-- [ ] A footer section labelled to convey optional support for the free tool
-- [ ] The Support QR is shown as a static local image (a placeholder until the real one is supplied)
-- [ ] The placeholder path / swap-in location is documented (e.g. in README or a comment)
-- [ ] The footer is visually quiet and does not interfere with the generator UI
-- [ ] No popup, banner, or auto-triggered prompt is used
+- [x] A footer section labelled to convey optional support for the free tool
+- [x] The Support QR is shown as a static local image (the maintainer's real bankQR.JPG)
+- [x] The placeholder path / swap-in location is documented (comment in index.html)
+- [x] The footer is visually quiet and does not interfere with the generator UI
+- [x] No popup, banner, or auto-triggered prompt is used
+
+Uses the real supplied image `./bankQR.JPG` (Touch 'n Go eWallet QR), not a placeholder. Verified in-browser: image loads (1179×1668, shown at 220px), footer sits below the generator with a quiet hairline separator, no dialogs/popups, no failed requests. Note: the image is public (repo + site), exposing the account name — intended for a tip jar.
 
 ## Blocked by
 
