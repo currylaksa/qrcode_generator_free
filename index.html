@@ -3,117 +3,369 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free QR Code Generator</title>
+    <title>QR//GEN — Free QR Code Generator</title>
     <style>
+      /* ---- Vendored fonts (no CDN; self-contained per ADR-0001) ---- */
+      @font-face {
+        font-family: "Archivo";
+        src: url("./vendor/fonts/archivo-latin.woff2") format("woff2");
+        font-weight: 100 900;
+        font-stretch: 62% 125%;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("./vendor/fonts/jetbrainsmono-latin.woff2") format("woff2");
+        font-weight: 100 800;
+        font-display: swap;
+      }
+
+      :root {
+        --paper: #f4f1ea;
+        --ink: #14110f;
+        --ink-soft: #6b655c;
+        --rule: #d8d3c7;
+        --signal: #e4231b;
+      }
+
+      * { box-sizing: border-box; }
+
       body {
-        font-family: system-ui, sans-serif;
-        max-width: 32rem;
-        margin: 3rem auto;
-        padding: 0 1rem;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        color: var(--ink);
+        background-color: var(--paper);
+        /* faint paper grain */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
         line-height: 1.5;
       }
-      .row {
+
+      .card {
+        position: relative;
+        width: 100%;
+        max-width: 33rem;
+        background: var(--paper);
+        border: 1.5px solid var(--ink);
+        box-shadow: 5px 5px 0 var(--ink);
+        padding: 1.4rem 1.6rem 1.2rem;
+      }
+
+      /* ---- top / bottom bars ---- */
+      .topbar, .botbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .brand {
+        font-family: "Archivo", sans-serif;
+        font-weight: 800;
+        font-stretch: 125%;
+        font-size: 1.7rem;
+        letter-spacing: 0.02em;
+      }
+      .tag {
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        color: var(--ink-soft);
+        border: 1px solid var(--rule);
+        padding: 0.2rem 0.45rem;
+        white-space: nowrap;
+      }
+      .rule {
+        border: none;
+        border-top: 1px solid var(--rule);
+        margin: 1rem 0;
+      }
+
+      .lbl {
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+      }
+
+      /* ---- input row ---- */
+      .field-row { margin: 0.6rem 0 0; }
+      .field-row .inputs {
         display: flex;
         gap: 0.5rem;
-        margin: 1rem 0;
+        margin-top: 0.4rem;
       }
       #url {
         flex: 1;
-        padding: 0.5rem;
-        font-size: 1rem;
+        min-width: 0;
+        font: inherit;
+        font-size: 0.95rem;
+        padding: 0.6rem 0.7rem;
+        color: var(--ink);
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 0;
+        outline: none;
+        transition: border-color 0.12s, box-shadow 0.12s;
       }
-      #generate,
-      #downloads button {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
+      #url::placeholder { color: #b6b0a5; }
+      #url:focus {
+        border-color: var(--signal);
+        box-shadow: inset 0 0 0 1px var(--signal);
+      }
+
+      /* ---- buttons (mono boxed) ---- */
+      button {
+        font: inherit;
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
         cursor: pointer;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1.5px solid var(--ink);
+        border-radius: 0;
+        padding: 0.6rem 0.9rem;
+        transition: background 0.12s, color 0.12s, transform 0.06s;
       }
-      #downloads button:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-      }
-      #downloads {
+      button:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+      button:active:not(:disabled) { transform: translate(1px, 1px); }
+      button:disabled { color: #b6b0a5; border-color: var(--rule); cursor: not-allowed; }
+      #generate { background: var(--ink); color: var(--paper); }
+      #generate:hover { background: var(--signal); border-color: var(--signal); }
+
+      /* ---- size control ---- */
+      .size-block {
         margin-top: 1rem;
-      }
-      #preview svg {
-        max-width: 100%;
-        height: auto;
-      }
-      #size-row {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin: 1rem 0;
+        gap: 0.7rem;
       }
       #size {
-        padding: 0.4rem;
-        font-size: 1rem;
+        font: inherit;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        padding: 0.4rem 0.6rem;
+        color: var(--ink);
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 0;
+        cursor: pointer;
       }
+
+      /* ---- error ---- */
       #error {
-        color: #c00;
-        min-height: 1.5rem;
-        margin: 0.25rem 0;
+        color: var(--signal);
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        min-height: 1.4rem;
+        margin: 0.9rem 0 0.2rem;
       }
-      #support {
-        margin-top: 4rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-        text-align: center;
-        color: #777;
-        font-size: 0.9rem;
+      #error:not(:empty)::before { content: "! "; font-weight: 700; }
+
+      /* ---- QR stage with crop marks ---- */
+      .stage {
+        position: relative;
+        margin: 0.4rem auto 0;
+        padding: 1.6rem;
+        min-height: 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      #support h2 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #555;
-        margin: 0 0 0.25rem;
+      .crop {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border: 0 solid var(--ink);
       }
-      #support img {
-        width: 220px;
+      .crop.tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+      .crop.tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+      .crop.bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+      .crop.br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+      #preview:empty::after {
+        content: "▸ awaiting input";
+        color: #b6b0a5;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+      }
+      #preview svg {
+        display: block;
         max-width: 100%;
         height: auto;
-        margin-top: 0.75rem;
+        animation: qrIn 0.35s ease both;
+      }
+
+      /* ---- downloads ---- */
+      #downloads {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      #downloads button { flex: 1; }
+
+      /* ---- footer ---- */
+      .botbar { font-size: 0.65rem; }
+      .note { color: var(--ink-soft); letter-spacing: 0.05em; }
+      .support-link {
+        border: none;
+        background: none;
+        padding: 0.15rem 0;
+        color: var(--signal);
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        position: relative;
+      }
+      .support-link:hover { background: none; color: var(--signal); }
+      .support-link::after {
+        content: "";
+        position: absolute;
+        left: 0; bottom: -1px;
+        width: 0; height: 1.5px;
+        background: var(--signal);
+        transition: width 0.18s ease;
+      }
+      .support-link:hover::after { width: 100%; }
+
+      /* ---- support modal ---- */
+      #support-dialog {
+        border: 1.5px solid var(--ink);
+        box-shadow: 6px 6px 0 var(--ink);
+        background: var(--paper);
+        padding: 0;
+        max-width: 21rem;
+        color: var(--ink);
+      }
+      #support-dialog::backdrop {
+        background: rgba(20, 17, 15, 0.45);
+        backdrop-filter: blur(3px);
+      }
+      #support-dialog[open] { animation: modalIn 0.22s ease both; }
+      .modal-inner { position: relative; padding: 1.5rem 1.6rem 1.7rem; text-align: center; }
+      .modal-inner h2 {
+        font-family: "Archivo", sans-serif;
+        font-weight: 800;
+        font-stretch: 125%;
+        font-size: 1.15rem;
+        letter-spacing: 0.04em;
+        margin: 0 0 0.5rem;
+      }
+      .modal-inner p {
+        font-size: 0.78rem;
+        color: var(--ink-soft);
+        margin: 0 auto 1rem;
+        max-width: 16rem;
+      }
+      .modal-qr {
+        position: relative;
+        display: inline-block;
+        padding: 0.9rem;
+        border: 1px dashed var(--rule);
+      }
+      .modal-qr img { display: block; width: 220px; max-width: 100%; height: auto; }
+      .modal-cap {
+        margin: 0.8rem 0 0 !important;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        color: var(--ink);
+      }
+      .modal-close {
+        position: absolute;
+        top: 0.6rem; right: 0.7rem;
+        border: none; background: none;
+        font-size: 0.95rem; padding: 0.2rem 0.35rem;
+        color: var(--ink-soft);
+      }
+      .modal-close:hover { background: none; color: var(--signal); }
+
+      /* ---- motion: staggered boot-up ---- */
+      .card > * { animation: bootIn 0.4s ease both; }
+      .card > *:nth-child(1) { animation-delay: 0.02s; }
+      .card > *:nth-child(2) { animation-delay: 0.06s; }
+      .card > *:nth-child(3) { animation-delay: 0.10s; }
+      .card > *:nth-child(4) { animation-delay: 0.14s; }
+      .card > *:nth-child(5) { animation-delay: 0.18s; }
+      .card > *:nth-child(6) { animation-delay: 0.22s; }
+      .card > *:nth-child(7) { animation-delay: 0.26s; }
+      .card > *:nth-child(8) { animation-delay: 0.30s; }
+
+      @keyframes bootIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+      @keyframes qrIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+      @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, .card > * { animation: none !important; }
       }
     </style>
   </head>
   <body>
-    <h1>Free QR Code Generator</h1>
-    <p>Paste a URL and generate a QR code. Everything runs in your browser.</p>
+    <main class="card">
+      <header class="topbar">
+        <span class="brand">QR//GEN</span>
+        <span class="tag">V.1 · FREE · NO-TRACKING</span>
+      </header>
 
-    <div class="row">
-      <input id="url" type="text" placeholder="https://example.com" />
-      <button id="generate">Generate</button>
-    </div>
+      <hr class="rule" />
 
-    <div id="size-row">
-      <label for="size">Size</label>
-      <select id="size">
-        <option value="256">Small (256px)</option>
-        <option value="512" selected>Medium (512px)</option>
-        <option value="1024">Large (1024px)</option>
-      </select>
-    </div>
+      <div class="field-row">
+        <label class="lbl" for="url">URL ▸</label>
+        <div class="inputs">
+          <input id="url" type="text" placeholder="https://example.com" />
+          <button id="generate">Generate</button>
+        </div>
+      </div>
 
-    <p id="error" role="alert"></p>
-    <div id="preview"></div>
+      <div class="size-block">
+        <span class="lbl">Size ▸</span>
+        <select id="size">
+          <option value="256">256 px — small</option>
+          <option value="512" selected>512 px — medium</option>
+          <option value="1024">1024 px — large</option>
+        </select>
+      </div>
 
-    <div class="row" id="downloads">
-      <button id="download-png" disabled>Download PNG</button>
-      <button id="download-svg" disabled>Download SVG</button>
-    </div>
+      <p id="error" role="alert"></p>
+
+      <div class="stage">
+        <span class="crop tl"></span>
+        <span class="crop tr"></span>
+        <span class="crop bl"></span>
+        <span class="crop br"></span>
+        <div id="preview"></div>
+      </div>
+
+      <div id="downloads">
+        <button id="download-png" disabled>Download .PNG</button>
+        <button id="download-svg" disabled>Download .SVG</button>
+      </div>
+
+      <hr class="rule" />
+
+      <footer class="botbar">
+        <span class="note">encoded client-side · nothing leaves your device</span>
+        <button id="support-open" class="support-link">♡ Support</button>
+      </footer>
+    </main>
 
     <!--
-      Support QR (tip jar). This is a *static image*, displayed only — never
-      generated by the app (contrast with the QR Code above). To swap it,
-      replace ./bankQR.JPG at the repo root with your own payment QR and
-      update the src/alt below to match the new filename.
+      Support QR (tip jar). Static image, displayed only — never generated by
+      the app (contrast with the QR Code above). Hidden until the visitor opens
+      the support dialog. To swap it, replace ./bankQR.JPG at the repo root and
+      update the <img> src/alt below.
     -->
-    <footer id="support">
-      <h2>Support this free tool</h2>
-      <p>This generator is free and ad-free. If it saved you time, a small tip
-        helps keep it running — entirely optional.</p>
-      <img src="./bankQR.JPG" alt="Touch 'n Go eWallet payment QR for Chan Qing Yee" />
-    </footer>
+    <dialog id="support-dialog">
+      <div class="modal-inner">
+        <button id="support-close" class="modal-close" aria-label="Close">✕</button>
+        <h2>Keep it free</h2>
+        <p>This tool is free &amp; ad-free. If it helped, a small tip keeps it alive — entirely optional.</p>
+        <div class="modal-qr">
+          <img src="./bankQR.JPG" alt="Touch 'n Go eWallet payment QR for Chan Qing Yee" />
+        </div>
+        <p class="modal-cap">▸ Scan to tip</p>
+      </div>
+    </dialog>
 
     <!-- Vendored QR library (no CDN); exposes window.qrcode -->
     <script src="./vendor/qrcode.js"></script>

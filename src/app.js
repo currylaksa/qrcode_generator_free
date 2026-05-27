@@ -65,6 +65,24 @@ export function initApp(doc, qrLib) {
     const dataUrl = matrixToPngDataUrl(doc, qrMatrix(qrLib, current), currentSize());
     triggerDownload(doc, dataUrl, qrFilename(current, "png"), false);
   });
+
+  wireSupportModal(doc);
+}
+
+// The Support QR (tip jar) stays hidden until the visitor opens this dialog.
+// Guarded so the app still initialises if the markup is absent.
+function wireSupportModal(doc) {
+  const dialog = doc.querySelector("#support-dialog");
+  const open = doc.querySelector("#support-open");
+  const close = doc.querySelector("#support-close");
+  if (!dialog || !open) return;
+
+  open.addEventListener("click", () => dialog.showModal());
+  if (close) close.addEventListener("click", () => dialog.close());
+  // Click on the backdrop (outside the modal content) closes it.
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
 }
 
 // Browser-only: paint the QR module grid onto a canvas and export a PNG.
