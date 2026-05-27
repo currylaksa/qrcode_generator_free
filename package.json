@@ -1,0 +1,16 @@
+{
+  "name": "qrcode-generator-free",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Free, ad-free, client-side QR code generator. Static site, no backend (ADR-0001).",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "happy-dom": "^15.0.0",
+    "qrcode-generator": "^1.5.2",
+    "vitest": "^2.0.0"
+  }
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free QR Code Generator</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 32rem;
+        margin: 3rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+      }
+      #url {
+        flex: 1;
+        padding: 0.5rem;
+        font-size: 1rem;
+      }
+      #generate {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      #preview svg {
+        width: 256px;
+        height: 256px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Free QR Code Generator</h1>
+    <p>Paste a URL and generate a QR code. Everything runs in your browser.</p>
+
+    <div class="row">
+      <input id="url" type="text" placeholder="https://example.com" />
+      <button id="generate">Generate</button>
+    </div>
+
+    <div id="preview"></div>
+
+    <!-- Vendored QR library (no CDN); exposes window.qrcode -->
+    <script src="./vendor/qrcode.js"></script>
+    <script type="module">
+      import { initApp } from "./src/app.js";
+      initApp(document, window.qrcode);
+    </script>
+  </body>
+</html>
